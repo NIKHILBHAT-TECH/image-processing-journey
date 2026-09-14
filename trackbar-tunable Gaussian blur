@@ -1,0 +1,52 @@
+import cv2
+
+
+cap = cv2.VideoCapture(0)
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+
+def nothing(x):
+    pass
+
+
+# trackbars to tune thresholds live — much better for teaching than hardcoded values
+cv2.namedWindow("trackbar")
+cv2.createTrackbar("Threshold1", "trackbar", 50, 255, nothing)
+cv2.createTrackbar("Threshold2", "trackbar", 150, 255, nothing)
+cv2.createTrackbar("Threshold3", "trackbar", 0, 50, nothing)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+
+    frame = cv2.flip(frame, 1)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    t3 = cv2.getTrackbarPos("Threshold3", "trackbar")
+    gaussian_blur1 = cv2.GaussianBlur(gray, (2*t3+1, 2*t3+1), 0)
+
+
+
+    t1 = cv2.getTrackbarPos("Threshold1", "trackbar")
+    t2 = cv2.getTrackbarPos("Threshold2", "trackbar")
+
+
+    edges = cv2.Canny(gaussian_blur1, t1, t2)
+
+    cv2.imshow("Gaussian Blur1", gaussian_blur1)
+    cv2.imshow("Original", frame)
+    cv2.imshow("trackbar", edges)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
+
