@@ -1,0 +1,31 @@
+import cv2
+
+
+cap = cv2.VideoCapture(0)  # 0 = default webcam
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+
+while True:
+    ret, frame = cap.read()   # ret = success flag, frame = the image
+    print(ret)
+    if not ret:
+        print("Failed to grab frame")
+        break
+
+
+    # frame = cv2.flip(frame, 1)  # mirror horizontally — feels natural for AR-style stuff
+
+
+    cv2.imshow("Webcam Feed", frame)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):  # press 'q' to quit
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
