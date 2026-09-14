@@ -1,0 +1,45 @@
+import cv2
+
+
+cap = cv2.VideoCapture(0)
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+       
+
+points = []
+def show_hsv_value(event, x, y, flags, param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        h, s, v = hsv_frame[y, x]
+        print(f"Clicked at ({x},{y}) -> HSV: (H={h}, S={s}, V={v})")
+        points.append((x, y))
+        print("Point captured:", (x, y))
+        print(points)
+                       # note: index as [row, col] = [y, x]
+        print(f"Clicked at ({x}, {y}) ->HSV: (H={h}, S={s}, V={v})")
+
+cv2.namedWindow("HSV")
+cv2.setMouseCallback("HSV", show_hsv_value)
+
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+   
+    frame = cv2.flip(frame, 1)
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+
+    cv2.imshow("Original (BGR)", frame)
+    cv2.imshow("HSV", hsv_frame)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+cap.release()
+cv2.destroyAllWindows()
