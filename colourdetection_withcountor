@@ -1,0 +1,62 @@
+import cv2
+import numpy as np
+
+
+cap = cv2.VideoCapture(0)
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+
+# Hardcoded HSV range for green
+lower = np.array([82, 68, 40])
+upper = np.array([189, 178, 187])
+
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+
+    frame = cv2.flip(frame, 1)
+   
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    gaussian_blur1 = cv2.GaussianBlur(hsv, (1, 1), 0)
+
+    mask = cv2.inRange(gaussian_blur1, lower, upper)
+
+
+    # find contours directly on the raw mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+
+    if contours:
+        # pick the largest contour — assume that's our object, ignore small noise blobs
+        largest = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest)
+
+
+        if area > 500:  # ignore tiny/noisy contours below this size
+            # get an enclosing circle for a clean bounding shape
+            (x, y), radius = cv2.minEnclosingCircle(largest)
+            center = (int(x), int(y))
+            radius = int(radius)
+
+
+            cv2.circle(frame, center, radius, (0, 255, 0), 2)
+            cv2.circle(frame, center, 5, (0, 0, 255), -1)  # centroid marker
+
+
+    cv2.imshow("Original", frame)
+    cv2.imshow("Mask", mask)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
