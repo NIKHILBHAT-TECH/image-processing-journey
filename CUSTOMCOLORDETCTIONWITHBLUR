@@ -1,0 +1,71 @@
+import cv2
+from matplotlib.pyplot import gray
+import numpy as np
+
+
+cap = cv2.VideoCapture(0)
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+def nothing(x):
+    pass
+cv2.namedWindow("trackbar")
+cv2.createTrackbar("Threshold3", "trackbar", 0, 50, nothing)
+cv2.createTrackbar("Threshold1", "trackbar",0, 255, nothing)
+cv2.createTrackbar("Threshold2", "trackbar", 0, 255, nothing)
+cv2.createTrackbar("Threshold5", "trackbar", 0, 255, nothing)
+cv2.createTrackbar("Threshold4", "trackbar", 0, 250, nothing)
+cv2.createTrackbar("Threshold6", "trackbar", 0, 250, nothing)
+cv2.createTrackbar("Threshold7", "trackbar", 0, 250, nothing)
+# Hardcode your calibrated HSV range here
+
+
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+
+    frame = cv2.flip(frame, 1)
+    
+    t1 = cv2.getTrackbarPos("Threshold1", "trackbar")
+    t2 = cv2.getTrackbarPos("Threshold2", "trackbar")
+    t3 = cv2.getTrackbarPos("Threshold3", "trackbar")
+    t4 = cv2.getTrackbarPos("Threshold4", "trackbar")
+    t5 = cv2.getTrackbarPos("Threshold5", "trackbar")
+    t6 = cv2.getTrackbarPos("Threshold6", "trackbar")
+    t7 = cv2.getTrackbarPos("Threshold7", "trackbar")
+    H_MIN, H_MAX = t1, t2
+    S_MIN, S_MAX = t4, t5
+    V_MIN, V_MAX = t6, t7
+
+
+    lower = np.array([H_MIN, S_MIN, V_MIN])
+    upper = np.array([H_MAX, S_MAX, V_MAX])
+
+    gaussian_blur1 = cv2.GaussianBlur(frame, (2*t3+1, 2*t3+1), 0)
+    hsv = cv2.cvtColor(gaussian_blur1, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower, upper)
+
+
+    # # apply mask back onto original frame to visualize what's being detected
+    result = cv2.bitwise_and(frame, frame, mask=mask)
+
+    cv2.imshow("Gaussian Blur1", gaussian_blur1)
+    cv2.imshow("Original", frame)
+    cv2.imshow("trackbar", mask)
+
+    cv2.imshow("Mask", mask)
+    cv2.imshow("Result", result)
+
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
