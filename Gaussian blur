@@ -1,0 +1,40 @@
+import cv2
+
+
+cap = cv2.VideoCapture(0)
+
+
+if not cap.isOpened():
+    print("Error: could not open webcam")
+    exit()
+
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+
+    frame = cv2.flip(frame, 1)
+
+
+    gaussian_blur1 = cv2.GaussianBlur(frame, (3,3), 0)
+    gaussian_blur2 = cv2.GaussianBlur(frame, (13,13), 0)
+    gaussian_blur3 = cv2.GaussianBlur(frame, (23,23), 0)
+    gaussian_blur4 = cv2.GaussianBlur(frame, (43,43), 0)
+
+
+
+
+    cv2.imshow("Original", frame)
+    cv2.imshow("Gaussian Blur1", gaussian_blur1)
+    cv2.imshow("Gaussian Blur2", gaussian_blur2)
+    cv2.imshow("Gaussian Blur3", gaussian_blur3)
+    cv2.imshow("Gaussian Blur4", gaussian_blur4)
+   
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
